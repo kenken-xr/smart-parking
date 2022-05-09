@@ -1,0 +1,313 @@
+<!-- 已经废弃了 -->
+<template>
+	<view class="content">
+		<!-- 注意要用nvue，不然不能覆盖 -->
+		<cover-image class="click-to-page-img" src="../../static/imgs/PIC.jpg"  @click="viewMapLocation(address2.longitude,address2.latitude,address2.title)"></cover-image>
+		<map 
+		style="width: 750rpx;height: 750rpx;" 
+		:longitude="longitude" 
+		:latitude="latitude" 
+		:scale="scale"
+		:markers="markers" 
+		:include-points="includePoints" 
+		:show-compass="true" 
+		:show-location="true">
+		</map>
+		
+		<view class="all">
+			<view class="item" >
+				<text class="title">请选择出发地</text>
+			</view>
+			<view class="input" @click="chooseAddress(1)">
+				<text class="color" placeholder="点我来选择出发地">{{address1.title}}</text>
+			</view>
+			<view class="item" >
+				<text class="title">请选择目的地</text>
+			</view>
+			<view class="input" @click="chooseAddress(2)">
+				<text class="color" placeholder="点我来选择目的地">{{address2.title}}</text>
+			</view>
+		</view>
+
+	</view>
+</template>
+
+<script>
+	var amapFile = require('@/common/amap-wx.130.js');//require这个js模块  
+	
+	export default {
+		data() {
+			return {
+				longitude: '', //经度
+				latitude: '', //纬度
+				scale: 16, //缩放级别
+				markers: [],//标记点
+				includePoints: [], //缩放视野以包含所有给定的坐标点
+				address1: {}, //出发地
+				address2: {}, //目的地
+				// aim_longitude:'',//要去的地方的经度
+				// aim_latitude:'',//要去的地方的纬度
+				// aim_name:'',//要去的地方的名称
+			}
+		},
+		onLoad() {
+			this._initMap();
+			//onLoad(option)
+			// console.log(option)
+		},
+		methods: {
+			// 初始化地图，
+			_initMap(){
+				let _this = this;
+				// #ifdef APP-PLUS
+				uni.getLocation({
+				    type: 'gcj02',
+					geocode:true,
+				    success: function (res) {
+						console.log(JSON.stringify(res))
+						_this.latitude = res.latitude;
+						_this.longitude = res.longitude;
+						let market = {
+							id: 1,
+							latitude: _this.latitude,
+							longitude: _this.longitude,
+							iconPath: '../../static/imgs/edit-maker.png',
+							title: res.address.poiName,
+							callout: {
+								content: res.address.poiName,
+								color: '#ffffff',
+								fontSize: '14',
+								display: 'ALWAYS',
+								bgColor: '#FF6F1E',
+								padding: '10',
+								textAlign: 'center',
+								borderRadius: '15'
+							}
+						}
+						_this.markers[0] = market;
+						_this.address1 = market;
+						_this.markers = [..._this.markers];
+						_this.includePoints[0] = market;
+				    },
+					fail:function(err) {
+						console.log(err)
+					},
+				});
+				// #endif
+				
+				// #ifdef H5
+				// H5端定位失败，目前只给了个默认定位，选择地点也会出现一些不可控的错误（地图缩放，无法生成标注等）
+				this.latitude = '30.59276';
+				this.longitude = '114.30525';
+				let market = {
+					id: 1,
+					latitude: this.latitude,
+					longitude: this.longitude,
+					iconPath: '../../static/edit-maker.png',
+				}
+				_this.markers[0] = market;
+				_this.markers = [..._this.markers];
+				_this.includePoints[0] = market;
+				// #endif
+			},
+			// 获取地理位置
+			getMyLocation() {
+				let that = this;
+				uni.getLocation({
+					type: 'gcj02',
+					success: function(res) {
+						that.myLatitude = res.latitude;
+						that.myLongitude = res.longitude;
+						console.log('myLatitude为' + that.myLatitude);
+						console.log('myLongitude为' + that.myLongitude);
+					},
+					fail: function(e) {
+						console.log(e);
+					}
+				});	
+			},
+			//选择地图
+			chooseAddress(type) {
+				//uni.chooseLocation方法打开地图选位
+				//这个默认使用的腾讯地图，但是腾讯地图检索不是很精确，不如高德
+				uni.chooseLocation({
+					success: res => {
+						let market = {
+							id: type,
+							latitude: res.latitude,
+							longitude: res.longitude,
+							iconPath: '../../static/edit-maker.png',
+							title: res.name,
+							callout: {
+								content: res.name,
+								color: '#ffffff',
+								fontSize: '14',
+								display: 'ALWAYS',
+								bgColor: '#FF6F1E',
+								padding: '10',
+								textAlign: 'center',
+								borderRadius: '15'
+							}
+						};
+						if (type == 1) {
+							this.markers[0] = market;
+							this.markers = [...this.markers];
+							this.address1 = market;
+							this.includePoints[0] = market;
+							this.includePoints = [...this.includePoints];
+						} else {
+							this.markers[1] = market;
+							this.markers = [...this.markers];
+							this.address2 = market;
+							this.includePoints[1] = market;
+							this.includePoints = [...this.includePoints];
+							// this.aim_longitude=address2.longitude;//要去的地方的经度
+							// this.aim_latitude=address2.latitude;//要去的地方的纬度
+							// this.aim_name=address2.title;//要去的地方的名称
+						}
+					}
+				});
+			},
+			clicktoindex(){
+				// let Latitude = this.myLatitude;
+			    // let Longitude= this.myLongitude;
+				// let value=this.address2.latitude;
+				uni.navigateTo({
+					//uni.navigateTo({url: '/pages/appstore/xxxx/xxxx?传递参数1key='+参数1值+'&传递参数2key='+参数2值});
+					// url:"../pathPlanning/pathPlanning?value="+value,
+					 url:"../pathPlanning/pathPlanning",
+					animationType:'fade-in',
+					animationDuration:1000,
+					sucess:(res)=>{
+						console.log(aim_longitude)
+					},
+					fail:(err)=>{
+						console.log(err)
+					}
+				})
+			},
+			
+			
+			// 没有在登录的时候获取自己的定位 而是点击事件 调用viewMapLocation()这个方法时获取了自己的定位 
+			//因考虑到用户拒绝获取自己的定位所以当用户再次点击后会唤起设置让用户打开定位 
+			
+			// 这里传入的三个参数分别是  要去的  经度 纬度 以及 地址信息
+			//注意这个只从当前所在地出发
+			viewMapLocation(longitude , latitude , address) {
+				// 获取定位信息
+				uni.getLocation({
+					// type: 'wgs84', //返回可以用于uni.openLocation的经纬度
+					type: 'gcj02',
+					// 用户允许获取定位
+					success: function (res) {
+						console.log(res,'经纬度')
+						if(res.errMsg=="getLocation:ok") {
+							console.log(latitude)
+							console.log(longitude)
+							uni.openLocation({
+								// 传入你要去的纬度
+								latitude:latitude,
+								// 传入你要去的经度
+								longitude:longitude,
+								// 传入你要去的地址信息 不填则为空
+								address:address,
+								// 缩放大小
+								scale:18,
+								success: function () {
+									console.log('success');
+								}
+							});
+						}
+			        },
+					// 用户拒绝获取定位后 再次点击触发
+				    fail:function(res) {
+					    console.log(res)
+					    if(res.errMsg == "getLocation:fail auth deny"){
+						    uni.showModal({
+								content:'检测到您没打开获取信息功能权限，是否去设置打开？',
+								confirmText: "确认",
+								cancelText:'取消',
+								success: (res) => {
+										if(res.confirm ){
+											uni.openSetting({
+												success: (res) => {
+													console.log('确定');
+												}
+											})
+										}else {
+											console.log('取消');
+											return false;
+										}
+								}
+							})                                              
+					    }
+			        },
+		        });
+			},
+			
+			
+
+		}
+	}
+</script>
+
+<style>
+	.all{
+		height:550px;
+	}
+	.item {
+		font-size: 18rpx;
+		padding: 20rpx;
+		height: 70rpx;
+		font-family:"宋体";
+		/* font-weight:bolder; */
+		margin-bottom: 3px;
+		margin-top: 5px;
+	}
+	.input{
+		padding: 20rpx;
+		height: 108rpx;
+		margin-left: 20px;
+		/* margin-right: 20px; */
+		margin-bottom: 5px;
+		margin-top:5px;
+		
+		/* border:none; */
+		outline:none;
+		width: 610rpx;
+		/* border-radius: 5px 5px 5px 5px; */
+		padding-left:10px;
+		/* border-color:#5555ff; */
+		/* padding-right:40px; */
+		border:2px solid #c5464a;
+		border-bottom:thick dotted #c5464a;
+		border-width :2px;
+		/* border-left-width {2} */
+	    border-bottom-left-radius: 5px;
+		border-bottom-right-radius:5px;
+		border-bottom-top-radius: 5px;
+		border-bottom-bottom-radius:5px;
+		/* background:transparent; 
+			top:0;
+			right:0; */
+	}
+	.title {
+		margin-left: 10rpx;
+	}
+	.color {
+		color:red;
+		font-family:"宋体";
+		font-weight:bold;
+		text-align:center;
+		font-size:17px;
+		font-weight:100;
+	}
+	.click-to-page-img {
+		position: fixed;
+		bottom: 420rpx;
+		right: 25rpx;
+		width: 200rpx;
+		height: 200rpx;
+	}
+</style>
+

@@ -1,0 +1,754 @@
+<!-- 没有用，做实验的 -->
+
+<!-- 下面是来尝试路径规划的-->
+<template>
+	
+</template>
+
+<script>
+	var amapFile = require('@/common/amap-wx.130.js');
+	var config = require('../../libs/config.js');
+	
+	Page({
+	  data: {
+	    markers: [{
+	      iconPath: "../../img/mapicon_navi_s.png",
+	      id: 0,
+	      latitude: 39.989643,
+	      longitude: 116.481028,
+	      width: 23,
+	      height: 33
+	    },{
+	      iconPath: "../../img/mapicon_navi_e.png",
+	      id: 0,
+	      latitude: 39.90816,
+	      longitude: 116.434446,
+	      width: 24,
+	      height: 34
+	    }],
+	    distance: '',
+	    cost: '',
+	    polyline: []
+	  },
+	  onLoad: function() {
+	    var that = this;
+	    var key = config.Config.key;
+	    var myAmapFun = new amapFile.AMapWX({key: '986e3e528e41c7db57356cc78a3727a9'});
+	    myAmapFun.getRidingRoute({
+	      origin: '116.481028,39.989643',
+	      destination: '116.434446,39.90816',
+	      success: function(data){
+	        var points = [];
+	        if(data.paths && data.paths[0] && data.paths[0].steps){
+	          var steps = data.paths[0].steps;
+	          for(var i = 0; i < steps.length; i++){
+	            var poLen = steps[i].polyline.split(';');
+	            for(var j = 0;j < poLen.length; j++){
+	              points.push({
+	                longitude: parseFloat(poLen[j].split(',')[0]),
+	                latitude: parseFloat(poLen[j].split(',')[1])
+	              })
+	            } 
+	          }
+	        }
+	        that.setData({
+	          polyline: [{
+	            points: points,
+	            color: "#0091ff",
+	            width: 6
+	          }]
+	        });
+	        if(data.paths[0] && data.paths[0].distance){
+	          that.setData({
+	            distance: data.paths[0].distance + '米'
+	          });
+	        }
+	        if(data.taxi_cost){
+	          that.setData({
+	            cost: '打车约' + parseInt(data.taxi_cost) + '元'
+	          });
+	        }
+	          
+	      },
+	      fail: function(info){
+	
+	      }
+	    })
+	  },
+	  goDetail: function(){
+	    wx.navigateTo({
+	      url: '../navigation_ride_detail/navigation'
+	    })
+	  },
+	  goToCar: function (e) {
+	    wx.redirectTo({
+	      url: '../navigation_car/navigation'
+	    })
+	  },
+	  goToBus: function (e) {
+	    wx.redirectTo({
+	      url: '../navigation_bus/navigation'
+	    })
+	  },
+	  goToRide: function (e) {
+	    wx.redirectTo({
+	      url: '../navigation_ride/navigation'
+	    })
+	  },
+	  goToWalk: function (e) {
+	    wx.redirectTo({
+	      url: '../navigation_walk/navigation'
+	    })
+	  }
+	})
+	
+</script>
+
+<style>
+	
+	
+</style>
+
+
+
+
+
+
+
+
+<!-- 下面是试一下搜索框 -->
+<!-- <template>
+	<view>
+		<uni-section title="基本用法" type="line"></uni-section>
+		<view class="example-body">
+			<uni-search-bar @confirm="search" @input="input" @cancel="cancel" />
+			<view class="search-result">
+				<text class="search-result-text">当前输入为：{{ searchVal }}</text>
+			</view>
+		</view>
+	</view>
+</template>
+
+<script>
+	export default {
+		components: {},
+		data() {
+			return {
+				searchVal: ''
+			}
+		},
+		methods: {
+			search(res) {
+				uni.showToast({
+					title: '搜索：' + res.value,
+					icon: 'none'
+				})
+			},
+			input(res) {
+				this.searchVal = res.value
+			},
+			cancel(res) {
+				uni.showToast({
+					title: '点击取消，输入值为：' + res.value,
+					icon: 'none'
+				})
+			}
+		},
+		onBackPress() {
+			// #ifdef APP-PLUS
+			plus.key.hideSoftKeybord();
+			// #endif
+		}
+	}
+</script>
+
+<style>
+	@charset "UTF-8";
+
+	/* 头条小程序组件内不能引入字体 */
+	/* #ifdef MP-TOUTIAO */
+	@font-face {
+		font-family: uniicons;
+		font-weight: normal;
+		font-style: normal;
+		src: url("~@/static/uni.ttf") format("truetype");
+	}
+
+	/* #endif */
+	/* #ifndef APP-NVUE */
+	page {
+		display: flex;
+		flex-direction: column;
+		box-sizing: border-box;
+		background-color: #efeff4;
+		min-height: 100%;
+		height: auto;
+	}
+
+	view {
+		font-size: 14px;
+		line-height: inherit;
+	}
+
+	.example {
+		padding: 0 15px 15px;
+	}
+
+	.example-info {
+		padding: 15px;
+		color: #3b4144;
+		background: #ffffff;
+	}
+
+	.example-body {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		flex-wrap: wrap;
+		justify-content: center;
+		padding: 0;
+		font-size: 14px;
+		background-color: #ffffff;
+	}
+
+	/* #endif */
+	.example {
+		padding: 0 15px;
+	}
+
+	.example-info {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		padding: 15px;
+		color: #3b4144;
+		background-color: #ffffff;
+		font-size: 14px;
+		line-height: 20px;
+	}
+
+	.example-info-text {
+		font-size: 14px;
+		line-height: 20px;
+		color: #3b4144;
+	}
+
+	.example-body {
+		flex-direction: column;
+		padding: 15px;
+		background-color: #ffffff;
+	}
+
+	.word-btn-white {
+		font-size: 18px;
+		color: #FFFFFF;
+	}
+
+	.word-btn {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		border-radius: 6px;
+		height: 48px;
+		margin: 15px;
+		background-color: #007AFF;
+	}
+
+	.word-btn--hover {
+		background-color: #4ca2ff;
+	}
+
+	.search-result {
+		margin-top: 10px;
+		margin-bottom: 20px;
+		text-align: center;
+	}
+
+	.search-result-text {
+		text-align: center;
+		font-size: 14px;
+	}
+
+	.example-body {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		padding: 0px;
+	}
+</style> -->
+
+<!-- 这个是试了一下动画，为了问问题 -->
+<!-- <template>
+   <image :src="item.url" mode="" class="img" 
+       v-for="(item,i) in images" :key='i' 
+       :style="{left:item.left,width:item.width,height:item.height,
+               animationDuration:item.animationDuration,animationDelay:item.animationDelay}"></image>
+	</image>
+</template>
+<script>
+ // 随机数方法：
+function randomNum(min, max) {
+	return (Math.random() * (max - min) + min);   // 需要小数的
+   // return Math.floor(Math.random() * (max - min) + min);  //  整数的
+};
+export default {
+    data() {
+		return {
+        //  把图片路径 和 样式 都写在一个数组里
+			images: [{
+				url: '../../static/imgs/indoor.png',
+			        left: '',
+				width:'',
+				height:'',
+				animationDuration:'',
+				animationDelay: '',
+			},
+			{
+				url: '../../static/imgs/indoor.png',
+				left: '',
+				width:'',
+				height:'',
+				animationDuration:'',
+				animationDelay: '',
+			},
+			{
+				url: '../../static/imgs/indoor.png',
+				left: '',
+				width:'',
+				height:'',
+				animationDuration:'',
+				animationDelay: '',
+			},
+			{
+				url: '../../static/imgs/indoor.png',
+				left: '',
+				width:'',
+				height:'',
+				animationDuration:'',
+				animationDelay: '',
+			}
+			],
+		}
+	},
+	onLoad() {
+		this.numimg()
+	},
+	methods:{
+		numimg() {
+			var url = this.images[Math.floor(Math.random() * this.images.length)];
+			console.log(url);
+			for (var i = 0; i < this.images.length; i++) {
+                        //  初始掉落位置 用了百分比  5%--90% 之间
+			this.images[i].left = randomNum(5, 90).toFixed(0) + '%';
+                        //  宽高 取整   56upx--75upx 之间
+			this.images[i].width = randomNum(56,75).toFixed(0)+'upx';
+			this.images[i].height = this.images[i].width;
+                        //  动画 保留了一位小数  5s--9s 之间
+			this.images[i].animationDuration = randomNum(5,9).toFixed(1)+'s';
+                        //  延迟 保留一位小数  0s--7s 之间
+			this.images[i].animationDelay = randomNum(0,7).toFixed(1)+'s';
+			}
+		},
+	}
+}
+</script>
+<style>
+  	
+   
+      .img {
+  		position: absolute;
+  		top: -50px;
+  		z-index: 99;
+  		animation: snow 10s infinite ease-in;
+  	}
+  	@keyframes snow {
+  		0% {
+  			top: -100upx;
+  			transform: translateX(0);
+  		}
+  	
+  		100% {
+  			top: 800px;
+  			transform: translateY(600px);
+  		}
+  	}
+</style> -->
+
+<!-- 
+<template>
+    <view class="card">
+        <view class="box">
+            <view class="row-box">
+                <view @click="isRotate = !isRotate" class="fill row-rotate " :class="{'rotate':isRotate}"></view>
+            </view>
+            <text>rotate(45deg) </text>
+        </view>
+       <view class="box">
+            <view class="row-box">
+                <view @click="isScale = !isScale" class="fill row-scale" :class="{'scale':isScale}"></view>
+            </view>
+            <text>scale(2)</text>
+        </view>
+
+    </view>
+</template>
+<script>
+    export default {
+        data() {
+            return {
+                "isRotate": false,
+                // "isScale":true,
+            }
+        },
+    }
+</script>
+<style>
+    .card {
+        width:710rpx;
+        margin:20rpx;
+        flex-direction:row;
+        flex-wrap: wrap;
+    }
+    .box{
+        width:500rpx;
+        height:500rpx;
+        justify-content: center;
+        align-items: center;
+    }
+    .row-box{
+        width:250rpx;
+        height:250rpx;
+        margin:10rpx;
+        background-color: #DDDDDD;
+    }
+    .fill{
+        width:100rpx;
+        height:100rpx;
+        position: center;
+        background-color: #03A9F4;
+        opacity: 0.5;
+    }
+    .row-rotate{
+        transition-duration:0.3s;
+        transform:rotate(0deg);
+    }
+    .rotate{
+        transition-duration:0.3s;
+        transform:rotate(45deg);
+    }
+    /* .row-scale{
+        transition-duration:0.3s;
+        transform:scale(1);
+    } */
+   /* .scale{
+        transform:scale(2);
+    } */
+</style> -->
+
+<!-- 
+<template>
+<view :animation="animationData" style="background:red;height:100rpx;width:100rpx"></view>
+</template>
+<script>
+	export default{
+	  data() {
+	    return {
+	      animationData: {}
+	    }
+	  },
+	  onShow: function(){
+	    var animation = uni.createAnimation({
+	      duration: 1000,
+	        timingFunction: 'ease',
+	    })
+	
+	    this.animation = animation
+	
+	    animation.scale(2,2).rotate(45).step()
+	
+	    this.animationData = animation.export()
+	
+	    setTimeout(function() {
+	      animation.translate(30).step()
+	      this.animationData = animation.export()
+	    }.bind(this), 1000)
+	  },
+	  methods:{
+	    rotateAndScale: function () {
+	      // 旋转同时放大
+	      this.animation.rotate(45).scale(2, 2).step()
+	      this.animationData = this.animation.export()
+	    },
+	    rotateThenScale: function () {
+	      // 先旋转后放大
+	      this.animation.rotate(45).step()
+	      this.animation.scale(2, 2).step()
+	      this.animationData = this.animation.export()
+	    },
+	    rotateAndScaleThenTranslate: function () {
+	      // 先旋转同时放大，然后平移
+	      this.animation.rotate(45).scale(2, 2).step()
+	      this.animation.translate(100, 100).step({ duration: 1000 })
+	      this.animationData = this.animation.export()
+	    }
+	  }
+	}
+</script> -->
+<!-- <template>
+	<view>
+			<view class="animation" :animation="animationData" >
+			<image src="../../static/imgs/indoor.png" class="click-to-indoor-img"></image>
+		  </view>
+		<button  class="button" @click="running" >别跑</button>
+	</view>
+	
+</template>
+<script>
+	 export default {
+	    data() {
+	      return {
+	        animationData: {}
+	        // 在data中初始化animationData
+	      }
+	    },
+	    onUnload() {
+	      this.animationData = {}
+	      // 页面关闭后清空数据
+	    },
+	    onload(){
+	        this.animation = uni.createAnimation()  
+	        // 创建动画实例
+	    },
+	    methods: {
+	      running() {
+			
+	        this.animation.translateX(100).step({duration:1000})
+	        // 调用实例的方法来描述动画,translateX定义动画类型为x轴偏移, 500为偏移长度, 单位px
+	        // 调用 step() 来表示一组动画完成(当前参数动画时间1s)
+	        // step 可以配置参数用于指定当前组动画的配置。具体参数请看文档
+	        this.animationData = this.animation.export()
+			
+	        // export方法导出动画数据
+	      }
+	    }
+	  }
+</script>
+
+<style>
+	.click-to-indoor-img{
+		width: 170rpx;
+		height: 170rpx;
+	}
+	.button{
+		margin-top: 40px;
+	}
+</style> -->
+
+
+<!-- <template>
+	<view :animation="animationData" >
+		<image class="click-to-indoor-img" src="../../static/imgs/indoor.png"  ></image>
+	</view>
+	
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				animationData: {}, // 在data中初始化animationData
+			};
+		},
+		onUnload() {
+		  this.animationData = {}
+		  // 页面关闭后清空数据
+		},
+		
+		onReady: function(res) {
+			//初始化动画
+			this.animation = uni.createAnimation({
+				timingFunction: "ease-in-out",
+			})
+			//使用动画循环
+			//每2.5秒（2500 毫秒）做这个动作 :
+			setInterval(() => {
+				// 调用 step() 来表示一组动画完成(当前参数动画时间1s)
+				// step 可以配置参数用于指定当前组动画的配置。具体参数请看文档
+				this.animation.scale(1.07 + Math.random() * 0.01).step({
+					duration: 1000
+				})
+				this.animation.scale(1).step({
+					duration: 1000
+				})
+				// export方法导出动画数据
+				this.animationData = this.animation.export()
+			}, 2500)
+		},
+	}
+	
+</script>
+
+<style>
+	.click-to-indoor-img{
+		position: fixed;
+		bottom: 270px;
+		right: 15px;
+		width: 170rpx;
+		height: 170rpx;
+	}
+</style> -->
+
+<!-- <template>
+	<view class="map-inputtips-input">
+	  <input bindinput="bindInput" placeholder="搜索" focus="true" />
+	</view>
+	
+	<view class="map_container">
+	  <map class="map" latitude='{{latitude}}' longitude='{{longitude}}' markers='{{markers}}'>
+		<cover-view class="map-search-list {{isShow ? '' : 'map-hide'}}">
+		  <cover-view bindtouchstart="bindSearch" wx:key="searchId" data-keywords="{{item.name}}" data-location="{{item.location}}" class="map-box" wx:for="{{tips}}">
+		    {{item.name}}
+		  </cover-view>
+		</cover-view>
+	  </map>
+	</view>
+
+</template>
+
+<script>
+	export default {
+		const app = getApp();
+		const amap = app.data.amap;
+		const key = app.data.key;
+		
+		data() {
+			 return {
+			       isShow: false,
+			       tips: {},
+			       longitude: '',
+			       latitude: '',
+			       markers: []
+			    }
+		},
+		 onLoad() {
+		    var _this = this;
+		    wx.getLocation({
+		      success: function(res) {
+		        if (res && res.longitude){
+		          _this.setData({
+		            longitude: res.longitude,
+		            latitude: res.latitude,
+		            markers:[{
+		              id:0,
+		              longitude: res.longitude,
+		              latitude: res.latitude,
+		              iconPath: '../../src/images/ding.png',
+		              width:32,
+		              height:32
+		            }]
+		          })
+		        }
+		      }
+		    })
+		  },
+	
+		methods: {
+	         bindInput() {
+	            var _this = this;
+	            var keywords = e.detail.value;
+	            var myAmap = new amap.AMapWX({ key: 'e7c8fd7de0f269406e5bddc587e47623' });
+	            myAmap.getInputtips({
+	              keywords: keywords,
+	              location: '',
+	              success: function (res) {
+	                if (res && res.tips) {
+	                  _this.setData({
+	                    isShow: true,
+	                    tips: res.tips
+	                  });
+	                }
+	              }
+	            })
+	          },
+	          bindSearch() {
+	            var keywords = e.target.dataset.keywords;
+	            var location = e.target.dataset.location.split(',');
+	            
+	            this.setData({
+	              isShow: false,
+	              longitude: location[0],
+	              latitude: location[1],
+	              markers: [{
+	                id: 0,
+	                longitude: location[0],
+	                latitude: location[1],
+	                iconPath: '../../static/imgs/navi.png',
+	                width: 32,
+	                height: 32,
+	                anchor: { x: .5, y: 1 },
+	                label: {
+	                  content: keywords,
+	                  color: 'blue',
+	                  fontSize: 12,
+	                  borderRadius: 5,
+	                  bgColor: '#fff',
+	                  padding: 3,
+	                  x: 0,
+	                  y: -50,
+	                  textAlign: 'center'
+	                }
+	              }]
+	            })
+	          }
+		   
+		},
+	};
+</script>
+
+<style lang="scss" scoped>
+	.map-inputtips-input{
+	  height: 80rpx;
+	  line-height: 80rpx;
+	  width: 100%;
+	  box-sizing: border-box;
+	  font-size: 30rpx;
+	  padding: 0 10px;
+	  background-color: #fff;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  z-index: 1000;
+	  border-bottom:1px solid #c3c3c3;
+	}
+	.map-inputtips-input input{
+	  border: 1px solid #ddd;
+	  border-radius: 5px;
+	  height: 60rpx;
+	  line-height: 60rpx;
+	  width: 100%;
+	  box-sizing: border-box;
+	  padding: 0 5px;
+	  margin-top: 10rpx;
+	}
+	.map-box{
+	  margin: 0 10px;
+	  border-bottom:1px solid #c3c3c3;
+	  height: 80rpx;
+	  line-height: 80rpx;
+	}
+	.map-box:last-child{border: none;}
+	.map-search-list{
+	  position: fixed;
+	  top: 80rpx;
+	  left: 0;
+	  width: 100%;
+	  z-index: 1000;
+	  background-color: #fff;
+	}
+
+</style>
+ -->

@@ -1,0 +1,291 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		
+		{
+		    "path" : "pages/qidong/qidong",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "",
+		        "enablePullDownRefresh": false,
+				"titleNView":false//让其铺满整个屏幕
+		    }
+		    
+		},
+		
+		{
+			"path": "pages/index/index",
+			"style":{
+				"navigationBarTitleText":"智能停车场"
+				//  "titleNView": {  
+				// 	"backgroundImage":"linear-gradient(to right, #FFDE28,#FF3228)"
+				// } 
+			
+			}
+		},
+		{
+			"path": "pages/map/map",
+			"style":{
+				"navigationBarTitleText":"首页",
+				"titleNView":false,//让其铺满整个屏幕
+				"enablePullDownRefresh": false
+				
+			}
+		},
+		
+		{
+			"path": "pages/my/my",
+			"style":{
+				"navigationBarTitleText":"我的",
+				"enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#FFF5C3,#e6bef5)"
+						"backgroundImage":"linear-gradient(to right,#c7ecff,#01afff)"
+					}  
+				}
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style":{
+				"navigationBarTitleText":"登录注册",
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#ABDCFF,#ffe0ce)"
+						// "backgroundImage":"linear-gradient(to right,#6fcdff,#2bc0ff)"
+					}  
+				}
+			}
+		},
+		{
+			"path": "pages/poi_parking/poi_parking",
+			"style":{
+				"navigationBarTitleText":"附近停车场",
+				"enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#ABDCFF,#ffe0ce)"
+						// "backgroundImage":"linear-gradient(to right,#ffffff,#6ebdf1)"
+						"backgroundImage":"linear-gradient(to right,#c7ecff,#01afff)"
+					}  
+				}
+			}
+		},
+		
+		{
+		    "path" : "pages/my6/my6",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "关于我们",
+		        "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						"backgroundImage":"linear-gradient(to right,#00E4FF,#d1abff)"
+						// "backgroundImage":"linear-gradient(to right,#ffffff,#59b7f1)"
+					}  
+				}
+		    }
+		    
+		},
+		{
+		    "path" : "pages/jumpto/jumpto",
+		    "style" :{
+		        "navigationBarTitleText": "室内地图",
+		        "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#ABDCFF,#ffe0ce)"
+						// "backgroundImage":"linear-gradient(to right,#ffffff,#6ebdf1)"
+						"backgroundImage":"linear-gradient(to right,#c7ecff,#01afff)"
+					}  
+				}
+		    }
+		},
+		
+		{
+			"path" : "pages/try/try/try",
+			 "style":{
+				 "navigationBarTitleText": "",
+				 "enablePullDownRefresh": false
+			}
+		},
+		
+		{
+			"path" : "pages/pathPlanning/pathPlanning",
+			"style":{
+				"navigationBarTitleText": "",
+				 "enablePullDownRefresh": false
+			}
+		},
+		
+		{
+			"path" : "pages/navi/navi",
+			"style" :{
+				"navigationBarTitleText": "导航",
+				"enablePullDownRefresh": false
+		    }
+		},
+		
+		{
+			"path": "pages/plusScan/index",
+			"style":{
+				"app-plus":{ //去掉顶部的title
+					"titleNView":false					
+				}
+			}
+		},
+		{
+            "path" : "pages/my1/my1",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "我的收藏",
+                "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#ffffff,#d5d5d5)"
+						"backgroundImage":"linear-gradient(to right,#ffffff,#59b7f1)"
+					}  
+				}
+            }
+            
+        },
+        {
+            "path" : "pages/my2/my2",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "我的信息",
+                "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#d5ffe3,#abf8ff)"
+						// "backgroundImage":"linear-gradient(to right,#30e4ff,#1379e7)"
+						"backgroundImage":"linear-gradient(to right,#ffffff,#59b7f1)"
+					}  
+				}
+                    }
+                },
+		{
+		    "path" : "pages/my3/my3",
+		    "style" :                                                                                    
+		    {
+		        "navigationBarTitleText": "历史记录",
+		        "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#fff675,#ff8bec)"
+						// "backgroundImage":"linear-gradient(to right,#72EDF2,#ffd450)"
+						"backgroundImage":"linear-gradient(to right,#ffffff,#59b7f1)"
+					}  
+				}
+		    }
+		    
+		}
+        
+        ,{
+            "path" : "pages/forget/forget",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/my4/my4",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "我的钱包",
+                "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#ffffff,#59b7f1)"
+						"backgroundImage":"linear-gradient(to right,#ffffff,#d5d5d5)"
+						// "backgroundImage":"linear-gradient(to right,#ABDCFF,#82c5ff)"
+					}  
+				}
+            }
+            
+        }
+        ,{
+            "path" : "pages/my5/my5",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "附近加油站",
+                "enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {  
+						// "backgroundImage":"linear-gradient(to right,#82c5ff,#cccccc)"
+						"backgroundImage":"linear-gradient(to right,#ffffff,#59b7f1)"
+					}  
+				}
+            }
+            
+        }
+        ,{
+            "path": "pages/popup/popup",
+            "style": {
+            	"navigationStyle": "custom",
+            	// "backgroundColor": "transparent",
+            	"app-plus": {
+            		"animationType": "fade-in",
+            		"background": "transparent",
+            		"popGesture": "none"
+            	}
+            }
+            
+        }
+        
+    ],
+	
+	"permission": {
+	  "scope.userLocation": {
+	    "desc": "你的位置信息将用于小程序位置接口的效果展示" // 高速公路行驶持续后台定位
+	  }
+	},
+	
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "Smart Parking",
+		
+		// "navigationBarBackgroundColor": "#FFFAFA",   //最上端navigationBarTitleText区域颜色
+		"backgroundColor": "#F8F8F8",  //最底层背景色，刷新时显示的背景颜色
+		"enablePullDownRefresh": true
+		// "navigationStyle": "custom"
+		
+	},
+	"tabBar":{
+		"color":"#707070",
+		"selectedColor":"#00aaff",
+		"borderStyle":"white",
+		"list":[
+			{
+				"text":"首页",
+				"pagePath":"pages/map/map",
+				"iconPath":"static/tabs/homepage.png",
+				"selectedIconPath":"static/tabs/1.png"
+			},
+			{
+				"text":"附近停车场",
+				"pagePath":"pages/poi_parking/poi_parking",
+				"iconPath":"static/tabs/around.png",
+				"selectedIconPath":"static/tabs/2.png"
+			},
+			{
+				"text":"我的",
+				"pagePath":"pages/my/my",
+				"iconPath":"static/tabs/user_my.png",
+				"selectedIconPath":"static/tabs/3.png"
+			}
+		]
+	},
+	"condition" : { //模式配置，仅开发期间生效
+		"current": 0, //当前激活的模式(list 的索引项)
+		"list": [
+			{
+				"name": "", //模式名称
+				"path": "", //启动页面，必选
+				"query": "" //启动参数，在页面的onLoad函数里面得到
+			}
+		]
+	}
+}

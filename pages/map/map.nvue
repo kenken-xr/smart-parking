@@ -1,0 +1,827 @@
+<!-- 一开始的界面 -->
+<template>
+	<view>
+		<view class="map">
+			<!-- enable-3D：是否显示3D楼块；show-compass：show-compass
+					show-compass：显示带有方向的当前定位点；
+					longitude：中心经度；中心经度：中心纬度
+					scale：缩放级别，取值范围为3-20
+					markers：标记点  (可能要改)  点击的是这个标记点
+					enable-overlooking:是否开启俯视
+					enable-traffic:是否开启实时路况
+					enable-poi:是否展示 POI 点
+					polyline:路线
+					enable-indoorMap:是否展示室内地图
+					enable-building:是否展示建筑物(废除原enable-3D属性 高德地图默认开启建筑物就是3D无法设置)
+					show-location:显示带有方向的当前定位点
+					注意一点：当值位置的时候前面加上：，否则，就不用-->
+			<!-- :style="{ height: allScreen - 44 + 'px' }" -->
+			<!-- scale="15" -->
+			<!--单位只支持px;不支持em,rem,pt,%,upx;
+			style="width: 750rpx;height: 1412rpx;"
+			style="width: 750rpx;height: 1300rpx;"
+			所有得设备宽度750px,高度1250px -->
+			<map id="my-map" ref="my-map" class="my-map" style="width: 750rpx;height: 1300rpx;" :longitude="longitude" :latitude="latitude"
+			 :markers="markers" enable-3D="true" show-location="true" :polyline="myPolyline" enable-overlooking="true"
+			 enable-traffic="true" enable-poi="true" enable-indoorMap="true" enable-building="true"
+			 enable-rotate="true"  :include-points="includePoints"></map>
+			<!-- 样式里减44px是因为默认的导航栏高度为44px -->
+			<!-- 在<map>上绘制内容使用<cover-view>组件 -->
+			<cover-view class="control-btn">
+				<!-- <image class="click-to-page-img" src="../../static/imgs/navi.png" :animation="animationData" @click="viewMapLocation(address2.longitude,address2.latitude,address2.title)"></image> -->
+		
+				<!-- <image class="click-to-indoor-img" src="../../static/imgs/indoor.png" :animation="animationData" @click="click"></image> -->
+				<!-- <view class="bubble zwyHot" style="--color:rgba(0, 0, 0, 0.15);"></view> -->
+				<!-- <image class="click-to-indoor-img" src="../../static/imgs/indoor.png" style="--color:rgba(0, 0, 0, 0.15);"  @click="click" ></image> -->
+				<!-- <image class="scan-image" src="../../static/scan_image/scan.png" @click="onScan"> </image> -->
+		
+				<cover-view class="all">
+					<cover-view class="choose" @click="chooseAddress(2)">
+						<cover-view class="wenzi">
+							<cover-view class="primary">
+								<text  class="first">导</text>
+								<text class="second">航</text>
+							</cover-view>
+							<cover-view class="english">
+								<text  class="first_english">N</text>
+								<text class="second_english">avigation</text>
+							</cover-view>
+						</cover-view>
+						<cover-view>
+							<image class="icon" src="../../static/imgs/navi.png"></image>
+						</cover-view>
+					</cover-view>
+					<cover-view class="choose" @click="onScan">
+						<cover-view class="wenzi">
+							<cover-view class="primary">
+								<text  class="first">扫</text>
+								<text class="second">码</text>
+							</cover-view>
+							<cover-view class="english">
+								<text  class="first_english">S</text>
+								<text class="second_english">can</text>
+							</cover-view>
+						</cover-view>
+						<cover-view>
+							<image class="icon" src="../../static/imgs/scan.png"></image>
+						</cover-view>
+					</cover-view>
+					
+				</cover-view>
+				
+				<cover-view class="weather">
+					<view>
+						<cover-image :src="weatherImg" class="weather-img"></cover-image>
+					</view>
+					<view>
+						<cover-view class="wearth-txt">{{ temperature + '℃' }}</cover-view>
+					</view>
+					
+				</cover-view>
+				
+				<!-- 提示框 -->
+				<!-- <cover-view class="help_image"> -->
+					<!-- <button> 按钮</button> -->
+					
+					<!-- 	<cover-image v-if="flag[0]" style="width:270px;height:150px;margin-top:255px;margin-left:50px" @click="click(0)" src="../../static/help_0.png" >
+						</cover-image>
+				
+					<cover-image  v-if="flag[1]" style="width:200px;height:90px;margin-top:455px;margin-left:0px" @click="click(1)" src="../../static/help_1.png" >
+					</cover-image>
+					<cover-image  v-if="flag[2]" style="width:200px;height:90px;margin-top:455px;margin-left:140px" @click="click(2)" src="../../static/help_2.png" >
+					</cover-image>
+					<cover-image  v-if="flag[3]" style="width:270px;height:150px;margin-top:255px;margin-left:50px" @click="click(3)" src="../../static/help_3.png" >
+					</cover-image>
+				</cover-view> -->
+
+			</cover-view>
+		
+		</view>
+	</view>
+	
+</template>
+
+<script>
+	var amapFile = require('@/common/amap-wx.130.js'); //require这个js模块  
+
+	export default {
+
+		// data 必须声明为返回一个初始数据对象的函数（注意函数内返回的数据对象不要直接引用函数外的对象）；
+		// 否则页面关闭时，数据不会自动销毁，再次打开该页面时，会显示上次数据。
+		data() {
+			return {
+				// flag:[false,false,false,false], //先假设有二个提示，后期再加哎，注意click也需要更改
+				// sentence:["扫码可以进入小地图","点击这里可以扫码","点击这里可以导航","以上就是所有的提示了，希望您使用愉快"],
+				
+				
+				//id: 0,
+				allScreen: '',
+				// myLatitude:'',//纬度
+				// myLongitude: '', //经度
+				// makers: [],//标记点数组
+				weather: '', //天气
+				temperature: '', //温度
+				myPolyline: [], //路线
+
+				animationData: {}, // 在data中初始化animationData
+
+				scale: 16, //缩放级别
+				longitude: '', //经度
+				latitude: '', //纬度
+				markers: [], //标记点
+				includePoints: [], //缩放视野以包含所有给定的坐标点
+				address1: {}, //出发地
+				address2: {}, //目的地
+
+				textscan: '扫码',
+				typescan: 'scan-listener',
+				value: ''
+			};
+		},
+
+		onUnload() {
+			this.animationData = {}
+			// 页面关闭后清空数据
+		},
+
+		onLoad() {
+			// var first_flag = uni.getStorageSync('first_flag');
+			// // var first_flag =false;
+			// console.log(first_flag)
+			// // let that=this;   //request请求体内的this并非我们所需的this，如果需要继续使用this来获取data内声明的变量，那么除了上面所说的that转存this之外，还可以通过bind方法将this绑定。
+			// if(first_flag==false)
+			// {
+			// 	var that=this;
+			// 	that.flag[0]=true;
+			// 	that.$forceUpdate()
+			// }
+			
+			
+			this._initMap();
+			let that = this;
+			var myAmapFun = new amapFile.AMapWX({
+				key: 'e7c8fd7de0f269406e5bddc587e47623',
+			});
+			
+			var myAmapFun_weather = new amapFile.AMapWX({
+				key: '986e3e528e41c7db57356cc78a3727a9',
+			});
+			that.getMyLocation();
+			myAmapFun.getPoiAround({
+				success: function(data) {
+					//成功回调
+				},
+				fail: function(info) {
+					//失败回调
+					console.log(info)
+				}
+			})
+
+			// that.getAuthorizeInfo();
+			uni.getSystemInfo({
+				success: function(e) {
+					that.allScreen = e.screenHeight;
+					// 这个获取屏幕的高度是可以成功的,有需要的话可以在改改
+					console.log(that.allScreen)
+				},
+				fail: function(e) {
+					console.log(e);
+				}
+			});
+			myAmapFun_weather.getWeather({
+				success: function(data) {
+					that.weather = data.weather.data;
+					that.temperature = data.temperature.data;
+					console.log(data.weather.data);
+				},
+				fail: function(info) {
+					//失败回调
+					console.log(info);
+				}
+			});
+			
+			console.log(11111)
+			uni.navigateTo({
+				url: '/pages/popup/popup'
+			})
+			// var first_flag = uni.getStorageSync('first_flag');
+		 //    var first_flag =false;
+			// console.log(first_flag)
+			// if(first_flag==false)
+			// {
+			// 	// var that=this;  
+			// 	that.flag[0]=true;
+			// 	that.$forceUpdate()
+			// }
+		},
+		onReady: function(res) {
+			uni.$on(this.typescan, (data) => {
+				this.value = data.result
+			})
+			this.mapContext = uni.createMapContext('my-map', this);
+			//初始化动画
+			this.animation = uni.createAnimation({
+				timingFunction: "ease-in-out",
+			})
+			//使用动画循环
+			//每2.5秒（2500 毫秒）做这个动作 :
+			setInterval(() => {
+				// 调用 step() 来表示一组动画完成(当前参数动画时间1s)
+				// step 可以配置参数用于指定当前组动画的配置。具体参数请看文档
+				this.animation.scale(1.07 + Math.random() * 0.01).step({
+					duration: 1000
+				})
+				this.animation.scale(1).step({
+					duration: 1000
+				})
+				// export方法导出动画数据
+				this.animationData = this.animation.export()
+			}, 2500)
+		},
+		watch: {
+			//当经纬度变化时重新获取poi
+			lat() {
+				this.getPoiInfoAround()
+			}
+		},
+		methods: {
+			
+			// close() {
+			// 	uni.navigateBack()
+			// },
+			
+			onScan() {
+				// console.log('44444444');
+
+				uni.navigateTo({
+					url: '/pages/plusScan/index?text=' + this.textscan + '&type=' + this.typescan,
+				});
+				//打印一下扫码的结果
+				console.log(value);
+			},
+			// 初始化地图，
+			_initMap() {
+				let _this = this;
+
+				uni.getLocation({
+					type: 'gcj02',
+					geocode: true,
+					success: function(res) {
+						console.log(JSON.stringify(res))
+						_this.latitude = res.latitude;
+						_this.longitude = res.longitude;
+						let market = {
+							id: 1,
+							latitude: _this.latitude,
+							longitude: _this.longitude,
+							//iconPath: '../../static/imgs/edit-maker.png',
+							title: res.address.poiName,
+							// callout: {
+							// 	content: res.address.poiName,
+							// 	color: '#ffffff',
+							// 	fontSize: '14',
+							// 	display: 'ALWAYS',
+							// 	bgColor: '#FF6F1E',
+							// 	padding: '10',
+							// 	textAlign: 'center',
+							// 	borderRadius: '15'
+							// }
+						}
+						_this.markers[0] = market;
+						_this.address1 = market;
+						_this.markers = [..._this.markers];
+						_this.includePoints[0] = market;
+						console.log("success")
+					},
+					fail: function(err) {
+						console.log(err)
+					},
+				});
+
+			},
+			// 确认按钮
+			handleQue() {
+				console.log('确认')
+			},
+			// 位置授权
+			getAuthorizeInfo() {
+				uni.authorize({
+					scope: 'scope.userLocation',
+					success() { // 允许授权
+						self.getLocationInfo();
+					},
+					fail() { // 拒绝授权
+						self.openConfirm();
+						console.log("你拒绝了授权，无法获得周边信息")
+					}
+				})
+			},
+			// 获取地理位置
+			getMyLocation() {
+				let that = this;
+				uni.getLocation({
+					type: 'gcj02',
+					success: function(res) {
+						that.Latitude = res.latitude;
+						that.Longitude = res.longitude;
+						console.log('当前所在位置的Latitude为' + that.Latitude);
+						console.log('当前所在位置的Longitude为' + that.Longitude);
+					},
+					fail: function(e) {
+						console.log(e);
+					}
+				});
+			},
+
+			// 再次获取授权
+			// 当用户第一次拒绝后再次请求授权
+			openConfirm() {
+				uni.showModal({
+					title: '请求授权当前位置',
+					content: '需要获取您的地理位置，请确认授权',
+					success: (res) => {
+						if (res.confirm) {
+							uni.openSetting(); // 打开地图权限设置
+						} else if (res.cancel) {
+							uni.showToast({
+								title: '你拒绝了授权，无法获得周边信息',
+								icon: 'none',
+								duration: 1000
+							})
+						}
+					}
+				});
+			},
+			assembleClick() {
+				uni.chooseLocation({
+					success: function(res) {
+						console.log('位置名称：' + res.name);
+						console.log('详细地址：' + res.address);
+						console.log('纬度：' + res.latitude);
+						console.log('经度：' + res.longitude);
+					}
+				});
+			},
+
+			/*
+		// clicktoindex(){
+		// 	let Latitude = this.myLatitude;
+		//     let Longitude= this.myLongitude;
+		// 	// let value = this.myLatitude;
+		// 	uni.navigateTo({
+		// 		//uni.navigateTo({url: '/pages/appstore/xxxx/xxxx?传递参数1key='+参数1值+'&传递参数2key='+参数2值});
+		// 		url:"../navi/navi",
+		// 		animationType:'fade-in',
+		// 		animationDuration:1000,
+		// 		sucess:(res)=>{
+		// 			// console.log(res)
+		// 			// console.log(this.myLatitude)
+		// 		},
+		// 		fail:(err)=>{
+		// 			console.log(err)
+		// 		}
+		// 	})
+	 //    },
+	 */
+
+			clicktoindoor() {
+				// location.href="https://www.baidu.com/",
+				uni.navigateTo({
+					url: "../jumpto/jumpto",
+					// url:"https://www.baidu.com/",
+					animationType: 'fade-in',
+					animationDuration: 1000,
+					sucess: (res) => {
+						// console.log(res)
+						// console.log(this.myLatitude)
+					},
+					fail: (err) => {
+						console.log(err)
+					}
+				})
+			},
+
+			// click() {
+			// 	// plus.runtime.openURL('https://www.baidu.com')//这个这对APP有效
+			// 	uni.navigateTo({
+			// 		url: '../jumpto/jumpto'
+			// 	})
+			// },
+			// click(index){
+			// 	// console.log(this.flag[index])
+			// 	this.flag[index] = false;
+			// 	// console.log(this.flag[index])
+			// 	this.flag[index+1]=true;
+			// 	this.$forceUpdate()
+			// 	if(index==3){
+			// 		uni.setStorageSync('first_flag', true);
+			// 	}
+			// },
+
+
+			// 没有在登录的时候获取自己的定位 而是点击事件 调用viewMapLocation()这个方法时获取了自己的定位
+			//因考虑到用户拒绝获取自己的定位所以当用户再次点击后会唤起设置让用户打开定位 
+
+			// 这里传入的三个参数分别是  要去的  经度 纬度 以及 地址信息
+			//注意这个只从当前所在地出发
+			viewMapLocation(longitude, latitude, address) {
+				// 获取定位信息
+				uni.getLocation({
+					// type: 'wgs84', //返回可以用于uni.openLocation的经纬度
+					type: 'gcj02',
+					// 用户允许获取定位
+					success: function(res) {
+						console.log(res, '经纬度')
+						//下面是进行路径规划
+						// uni.navigateTo({
+						// 	// console.log(2)
+						// 	url: '../pathPlanning/pathPlanning?address1_longitude='+res.longitude+'&address1_latitude='
+						//       +res.latitude+'&address2_longitude='+longitude+'&address2_latitude='
+						//                  +latitude,
+						//                 // url: '../pathPlanning/pathPlanning',
+						// 	   // url:'../pathPlanning/pathPlanning',
+						// 	// console.log(1)
+						// });
+						// console.log(1)
+
+
+
+						//下面是打开内置的地图
+						if (res.errMsg == "getLocation:ok") {
+							console.log(latitude)
+							console.log(longitude)
+							uni.openLocation({
+								// 传入你要去的纬度
+								latitude: latitude,
+								// 传入你要去的经度
+								longitude: longitude,
+								// 传入你要去的地址信息 不填则为空
+								address: address,
+								// 缩放大小
+								scale: 18,
+								success: function() {
+									console.log('success');
+								}
+							});
+						}
+					},
+					// 用户拒绝获取定位后 再次点击触发
+					fail: function(res) {
+						console.log(res)
+						if (res.errMsg == "getLocation:fail auth deny") {
+							uni.showModal({
+								content: '检测到您没打开获取信息功能权限，是否去设置打开？',
+								confirmText: "确认",
+								cancelText: '取消',
+								success: (res) => {
+									if (res.confirm) {
+										uni.openSetting({
+											success: (res) => {
+												console.log('确定');
+											}
+										})
+									} else {
+										console.log('取消');
+										return false;
+									}
+								}
+							})
+						}
+					},
+				});
+			},
+
+			//选择地图
+			chooseAddress(type) {
+				//uni.chooseLocation方法打开地图选位
+				//这个默认使用的腾讯地图，但是腾讯地图检索不是很精确，不如高德
+				uni.chooseLocation({
+					success: res => {
+						let market = {
+							id: type,
+							latitude: res.latitude,
+							longitude: res.longitude,
+							iconPath: '../../static/edit-maker.png',
+							title: res.name,
+							// callout: {
+							// 	content: res.name,
+							// 	color: '#ffffff',
+							// 	fontSize: '14',
+							// 	display: 'ALWAYS',
+							// 	bgColor: '#FF6F1E',
+							// 	padding: '10',
+							// 	textAlign: 'center',
+							// 	borderRadius: '15'
+							// }
+						};
+						if (type == 1) {
+							this.markers[0] = market;
+							this.markers = [...this.markers];
+							this.address1 = market;
+							this.includePoints[0] = market;
+							this.includePoints = [...this.includePoints];
+						} else {
+							this.markers[1] = market;
+							this.markers = [...this.markers];
+							this.address2 = market;
+							this.includePoints[1] = market;
+							this.includePoints = [...this.includePoints];
+						};
+						this.viewMapLocation(this.address2.longitude, this.address2.latitude, this.address2.title);
+
+					},
+				});
+				// console.log(11111)
+
+
+			},
+		},
+		computed: {
+			weatherImg: function() {
+				//返回天气图片，未完善
+				//全部天气类型在https://lbs.amap.com/api/webservice/guide/tools/weather-code/
+				switch (this.weather) {
+					case '晴':
+						// return 'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-tourism/fd3680c0-797a-11ea-b997-9918a5dda011.png';
+						return '../../static/imgs/weather/1.png';
+						break;
+					case '多云':
+						// return 'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-tourism/fd29d690-797a-11ea-b94e-47f67ecf8268.png';
+						return '../../static/imgs/weather/2.png';
+						// return '../../static/imgs/navi.png';
+						break;
+					case '阴':
+						return '../../static/imgs/weather/3.png';
+						break;
+					case '雷阵雨并伴有冰雹':
+						return '../../static/imgs/weather/4.png';
+						break;
+					case '雷阵雨':
+						return '../../static/imgs/weather/5.png';
+						break;
+					case '大雨':
+						return '../../static/imgs/weather/6.png';
+						break;
+					case '暴雨':
+						return '../../static/imgs/weather/7.png';
+						break;
+					case '霾':
+						return '../../static/imgs/weather/8.png';
+						break;
+					case '小雪':
+						return '../../static/imgs/weather/9.png';
+						break;
+					case '小雨':
+						return '../../static/imgs/weather/10.png';
+						break;
+					case '中雪':
+						return '../../static/imgs/weather/11.png';
+						break;
+					case '中雨':
+						return '../../static/imgs/weather/12.png';
+						break;
+					case '大雪':
+						return '../../static/imgs/weather/13.png';
+						break;
+					case '雾':
+						return '../../static/imgs/weather/14.png';
+						break;
+					default:
+						return '../../static/imgs/weather/15.png';
+				}
+			}
+		}
+	};
+</script>
+
+<style scoped>
+	
+	/* nvue好像不能用scss */
+	.map {}
+
+	.my-map {}
+
+	.control-btn {
+		position: fixed;
+		/* 导航栏的宽度,后续可以在修改 */
+		/* height:500px; 
+	 bottom: 30px; 
+	top:300px; 
+	left: 5px; 
+	 right:5px; 
+	 flex-direction: column; 
+	   align-items: center; 
+       background-color: #f00; */
+	}
+	.help_image{
+		position: fixed;
+		/* top: 50px;
+		left: 10rpx; */
+	}
+
+	.weather {
+		position: fixed;
+		top: 50px;
+		right: 10px;
+		background-color: #fff;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.weather-img {
+		width: 25px;
+		height: 25px;
+	}
+
+	.wearth-txt {
+		color: #999999;
+		font-size: 13px;
+	}
+
+	.all {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		width: 750rpx;
+		height: 100px;
+		/* 控制底下的间距 */
+		margin-top:570px;
+		/* 570 */
+		/* 530 */
+		/* background:linear-gradient(to right,#d3cce3,#e9e4f0); */
+		background-color: #ffffff;
+	}
+	
+	.choose{
+		width:350rpx;
+		height: 150rpx;
+		display: flex;
+		margin-top: 10rpx;
+		margin-left: 5px;
+		line-height: 50rpx;
+		/* justify-content: center; */
+		border-radius: 15px;
+		background:linear-gradient(to right,#abdcff,#0396FF);
+		/* background-color: #ff5500; */
+		font-size: 28rpx;	
+		flex-direction: row;
+	}
+	.wenzi{
+		width:200rpx;
+		margin-left:15px;
+	}
+	.primary{
+		margin-top: 10rpx;
+		font-size: 40rpx;
+		font-weight:300;
+		/* background-color:#55ff00; */
+		flex-direction: row;
+		font-family:"宋体";
+		/* background-color: #0091FF; */
+	}
+	.first{
+		font-size: 60rpx;
+		color:#ffffff;
+	}
+	.second{
+		margin-top: 20rpx;
+		color:#ffffff;
+	}
+	.english{
+		margin-top: 8rpx;
+		font-size: 20rpx;	
+		font-weight:100;
+		font-family:"Times New Roman";
+		/* background-color:#ffaa00!important; */
+		flex-direction: row;
+	}
+	.first_english{
+		font-size: 50rpx;
+		color:#ffffff;
+		font-weight:300;
+	}
+	.second_english{
+		margin-top: 9rpx;
+		color:#ffffff;
+	}
+	.icon{
+		width:70rpx;
+		height: 70rpx;
+		margin-left:14px;
+		margin-top: 35rpx;
+		/* background-color:#55ff00; */
+	}
+	
+	/* .scan{
+		width:350rpx;
+		height: 150rpx;
+		display: flex;
+		margin-top: 10rpx;
+		margin-left: 5px;
+		margin-right: 5px; 
+		line-height: 50rpx;
+		justify-content: center;
+		border-radius: 15px;
+		background:linear-gradient(to right, #ABDCFF,#0396FF);
+		/* background-color: #ff5500; */
+		/* font-size: 28rpx; */
+	/* } */ 
+
+	.item {
+		font-size: 8px;
+		padding: 10rpx;
+		height: 22px;
+		font-family: "宋体";
+		/* font-weight:bolder; */
+		margin-bottom: 3px;
+		margin-left: 7px;
+		margin-top: 5px;
+	}
+
+	.input {
+		padding: 20rpx;
+		height: 150rpx;
+
+		width: 650rpx;
+		margin-left: 30px;
+		margin-bottom: 5px;
+		margin-top: 20px;
+		background-color: #EBF0F3;
+
+		/* border: none; */
+		outline: none;
+		/* border-radius: 5px 5px 5px 5px; */
+		padding-left: 10px;
+		/* border-color:#5555ff; */
+		/* padding-right:40px; */
+		border: 2px solid #DFE4E7;
+		border-bottom: thick solid #DFE4E7;
+		border-width: 2px;
+		/* border-left-width {2} */
+		border-top-right-radius: 50rpx;
+		border-bottom-left-radius: 50rpx;
+		border-bottom-right-radius: 50rpx;
+		border-top-left-radius: 50rpx;
+		text-align: center;
+	}
+
+	.title {
+		margin-left: 30rpx;
+	}
+
+	.color {
+		font-family: "宋体";
+		font-weight: bold;
+		text-align: center;
+		font-size: 17px;
+		font-weight: 100;
+	}
+
+	.click-to-page-img {
+		/* animation: scaleDrew 1s ease-in-out infinite; */
+		position: fixed;
+		bottom: 570rpx;
+		right: 25rpx;
+		width: 170rpx;
+		height: 170rpx;
+	}
+
+	.click-to-indoor-img {
+		position: fixed;
+		bottom: 770rpx;
+		right: 25rpx;
+		width: 170rpx;
+		height: 170rpx;
+	}
+
+	.scan-image {
+		position: fixed;
+		right: 20px;
+		top: 100px;
+		width: 40px;
+		height: 40px;
+	}
+	
+
+	
+
+	/* 定义关键帧、scaleDrew是需要绑定到选择器的关键帧名称 */
+	/* @keyframes scaleDrew {
+
+    0% {
+      transform: scale(1);
+    }
+
+    25% {
+      transform: scale(1.05);
+    }
+
+    50% {
+      transform: scale(1);
+    }
+
+    75% {
+      transform: scale(1.05);
+    }
+} */
+</style>
